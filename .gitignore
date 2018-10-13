@@ -89,6 +89,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+lastenv/
 
 # Spyder project settings
 .spyderproject
@@ -102,3 +103,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# authentication
+secrets.json
+
+# Work in progress folder
+WIP/
+
