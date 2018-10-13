@@ -1,6 +1,7 @@
 import pylast
 import requests
 import json
+import pandas as pd
 
 with open("secrets.json", 'r') as file:
     jsonfile = json.load(file)
@@ -26,9 +27,22 @@ def get_friends(username, limit=400):
     user = network.get_user(username)
     friends_list = []
     friends_item = user.get_friends(300)
-    for friend in friends_item:
-        friends_list.append(friend.name)
-    return friends_list
+    total_friends = len(friends_item)
+    for i, friend in enumerate(friends_item):
+        thisfriend = []
+        try:
+            name = friend.name
+            playcount = friend.get_playcount()
+            country = friend.get_country()
+            thisfriend.append(name)
+            thisfriend.append(country)
+            thisfriend.append(playcount)
+            friends_list.append(thisfriend)
+        except:
+            next
+    friends_df = pd.DataFrame(friends_list, columns=["Name", "Country", "Playcount"])
+    friends_sorted = friends_df.sort_values(by="Playcount", ascending=False)
+    return friends_sorted
 
 
 def get_loved_tracks(username):
