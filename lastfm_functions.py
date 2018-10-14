@@ -102,7 +102,6 @@ def get_historical_tracks(user, API_key):
             album_name = item['album']['#text']
             track_name = item['name']
             loved = item['loved']
-            print(page, artist_name, track_name)
             mbid_lst.append(mbid)
             try:
                 date_epoch = item['date']['uts']
@@ -114,7 +113,7 @@ def get_historical_tracks(user, API_key):
             album_lst.append(album_name)
             track_lst.append(track_name)
             loved_lst.append(loved)
-
+            print(page, "/", total_pages, artist_name, "-", track_name, "-", date_local)
             # SAVE PARTIAL FILES EACH 10 PAGES
 
             if page % 10 == 0:
