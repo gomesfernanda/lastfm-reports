@@ -20,8 +20,8 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=username, password_hash=password_hash)
 
 
-def get_bio():
-    artist = network.get_artist("Elton John")
+def get_bio(artist_name):
+    artist = network.get_artist(artist_name)
     bio = artist.get_bio_summary()
     return bio
 
@@ -137,7 +137,11 @@ def get_clean_top_tags(artist, limit=20):
     artist = network.get_artist(artist)
     toptags = artist.get_top_tags(limit)
     toptags_list = []
+    unify_artist = str(artist).lower().replace(" ", "")
+    bad_tags = [unify_artist, "seen live"]
     for i, tag in enumerate(toptags):
-        toptag = tag.item
-        toptags_list.append(toptag)
+        toptag = str(tag.item).lower()
+        toptag_unified = toptag.replace(" ", "")
+        if toptag not in bad_tags and toptag_unified not in bad_tags:
+            toptags_list.append(toptag)
     return toptags_list
