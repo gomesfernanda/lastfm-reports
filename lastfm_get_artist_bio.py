@@ -20,25 +20,29 @@ def get_credentials():
     return API_KEY, API_SECRET, username, password, password_hash
 
 def get_bio_tags(artist, network, limit=20):
-    artist = network.get_artist(artist)
-    bio = artist.get_bio_summary()
-    toptags = artist.get_top_tags(limit)
-    toptags_list = []
-    unify_artist = str(artist).lower().replace(" ", "")
-    bad_tags = [unify_artist, "seen live"]
-    for i, tag in enumerate(toptags):
-        toptag = str(tag.item).lower()
-        toptag_unified = toptag.replace(" ", "")
-        if toptag not in bad_tags and toptag_unified not in bad_tags:
-            toptags_list.append(toptag)
+    artist_ = network.get_artist(artist)
+    try:
+        bio = artist_.get_bio_summary()
+        toptags = artist_.get_top_tags(limit)
+        toptags_list = []
+        unify_artist = str(artist_).lower().replace(" ", "")
+        bad_tags = [unify_artist, "seen live"]
+        for i, tag in enumerate(toptags):
+            toptag = str(tag.item).lower()
+            toptag_unified = toptag.replace(" ", "")
+            if toptag not in bad_tags and toptag_unified not in bad_tags:
+                toptags_list.append(toptag)
+    except Exception as e:
+        bio = str(e)
+        toptags_list = []
     return bio, toptags_list
 
 def main():
     args = setup()
     artist = args.artist
+    func = args.function
     API_KEY, API_SECRET, username, password, password_hash = get_credentials()
     network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username, password_hash=password_hash)
-    func = args.function
     bio, toptags = get_bio_tags(artist, network)
     if func == "bio":
         print(bio)
