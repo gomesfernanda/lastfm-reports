@@ -22,7 +22,6 @@ def get_credentials():
 def get_bio_tags(artist, network, limit=20):
     artist = network.get_artist(artist)
     bio = artist.get_bio_summary()
-    artist = network.get_artist(artist)
     toptags = artist.get_top_tags(limit)
     toptags_list = []
     unify_artist = str(artist).lower().replace(" ", "")
