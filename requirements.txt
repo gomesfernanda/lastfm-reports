@@ -11,6 +11,7 @@ pylast==2.4.0
 pyparsing==2.2.2
 python-dateutil==2.7.3
 pytz==2018.5
-requests==2.19.1
+requests==2.21.0
 six==1.11.0
+Unidecode==1.0.22
 urllib3==1.23
