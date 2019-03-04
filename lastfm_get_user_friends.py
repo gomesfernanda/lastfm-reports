@@ -49,7 +49,7 @@ def main():
         limit = None
     API_KEY, API_SECRET, username, password, password_hash = get_credentials()
     network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username, password_hash=password_hash)
-    user_friends = get_friends(user, network, limit)
+    user_friends = get_friends(user, network, limit=limit)
     print(user_friends)
 
 if __name__ == '__main__':
