@@ -100,10 +100,8 @@ def get_pages_scrobbled(username, network):
 
 def get_historical_tracks(user, API_key, artists_dict, network, session):
     todaynow = datetime.now().strftime("%Y%m%d%H%M")
+    directory = "export_" + str(user) + "_" + str(todaynow[:8])
     scrobbles, pages = get_pages_scrobbled(user, network)
-    directory = "export_" + str(user) + "_" + str(todaynow)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
     artist_lst = []
     album_lst = []
     track_lst = []
@@ -116,7 +114,7 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
     for page in range(start_page, total_pages+1):
         progbar(page, total_pages, "page", 20)
         time.sleep(0.1)
-        URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+user+"&api_key="+API_key+"&format=json&extended=1&limit=200&page=" + str(page)
+        URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + user + "&api_key="+ API_key + "&format=json&extended=1&limit=200&page=" + str(page)
         response = session.get(URL).content
         response_str = response.decode('utf8')
         response_json = json.loads(response_str)
@@ -134,9 +132,10 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
             loved = item['loved']
             try:
                 date_epoch = item['date']['uts']
-                date_local = time.strftime('%Y-%m-%d %H:%M', time.localtime(int(date_epoch)))
+                date_local = datetime.fromtimestamp(int(date_epoch))
             except:
-                date_local = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                date_local = datetime.strptime(date_now, '%Y-%m-%d %H:%M:%S')
             date_lst.append(date_local)
             artist_lst.append(artist_name)
             album_lst.append(album_name)
@@ -145,11 +144,15 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
 
         # SAVE PARTIAL FILES EACH 50 PAGES
         if page % 50 == 0:
+            if not os.path.exists(directory):
+                os.makedirs(directory)
             print("\n\n========== Saving partials file to disk, page", page, "==========\n")
             history_tracks = pd.DataFrame(
                 np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]),
                 columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
             history_tracks.to_csv(directory + "/historical_tracks_" + user + "_" + str(todaynow) + "_partial_" + str(page) + ".csv", sep=',', encoding='utf-8')
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     history_tracks = pd.DataFrame(np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]), columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
     history_tracks.to_csv(directory + "/historical_tracks_" + user + "_" + str(todaynow) + ".csv", sep=',', encoding='utf-8')
     return history_tracks
