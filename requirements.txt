@@ -1,3 +1,5 @@
+beautifulsoup4==4.7.1
+bs4==0.0.1
 certifi==2018.8.24
 chardet==3.0.4
 cycler==0.10.0
@@ -13,5 +15,6 @@ python-dateutil==2.7.3
 pytz==2018.5
 requests==2.21.0
 six==1.11.0
+soupsieve==1.8
 Unidecode==1.0.22
 urllib3==1.23
