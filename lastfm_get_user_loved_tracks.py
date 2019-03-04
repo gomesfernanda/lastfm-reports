@@ -44,7 +44,10 @@ def main():
     elif limit == "all":
         limit_pass = None
     else:
-        limit_pass = int(limit)
+        try:
+            limit_pass = int(limit)
+        except Exception as e:
+            print("Error:", e)
     API_KEY, API_SECRET, username, password, password_hash = get_credentials()
     network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username, password_hash=password_hash)
     loved_df = get_loved_tracks(user, network=network, limit=limit_pass)

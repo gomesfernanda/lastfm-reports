@@ -53,7 +53,7 @@ def main():
     try:
         print(get_recent_tracks(user, network, limit))
     except Exception as e:
-        print(e)
+        print("Error:", e)
 
 if __name__ == "__main__":
     main()
