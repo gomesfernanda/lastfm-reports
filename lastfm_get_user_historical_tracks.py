@@ -6,11 +6,12 @@ import numpy as np
 import time
 from datetime import datetime, timedelta
 import argparse
-from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, \
-    AdaptiveETA, FileTransferSpeed, FormatLabel, Percentage, \
-    ProgressBar, ReverseBar, RotatingMarker, \
-    SimpleProgress, Timer, UnknownLength
 
+
+def progbar(curr, total, full_progbar):
+    frac = curr/total
+    filled_progbar = round(frac*full_progbar)
+    print('\r', '█'*filled_progbar + '-'*(full_progbar-filled_progbar), '[{:>7.2%}]'.format(frac), "[",curr,"|",total,"]", end='')
 
 def setup():
     parser = argparse.ArgumentParser()
@@ -46,16 +47,13 @@ def get_historical_tracks(user, API_key, network, session):
     mbid_lst = []
     start_page = 1
     total_pages = pages
-    pbar = ProgressBar(widgets=["::", Percentage(), " [ page ", SimpleProgress(sep=" | "), " ]", Bar(marker="█", left="╣", right="╠"),  "  ", Timer()], maxval=total_pages).start()
     print("Collecting", (total_pages + 1 - start_page), "pages of tracks for the user", user)
     for page in range(start_page, total_pages+1):
-        time.sleep(0.01)
-        pbar.update(page + 1)
-        #print("Page ", page)
-        if page % 50 == 0: print("========== Saving partials file to disk ==========")
+        progbar(page, total_pages, total_pages // 10)
+        if page % 50 == 0: print("\n========== Saving partials file to disk, page", page ," ==========\n")
         count = 0
         time.sleep(0.05)
-        URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+user+"&api_key="+API_key+"&format=json&extended=1&limit=200&page="+str(page)
+        URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+user+"&api_key="+API_key+"&format=json&extended=1&limit=200&page=" + str(page)
         response = session.get(URL).content
         response_str = response.decode('utf8')
         response_json = json.loads(response_str)
@@ -79,12 +77,11 @@ def get_historical_tracks(user, API_key, network, session):
             track_lst.append(track_name)
             loved_lst.append(loved)
             # SAVE PARTIAL FILES EACH 50 PAGES
-            if page % 50 == 0:
-                history_tracks = pd.DataFrame(
-                    np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, mbid_lst]),
-                    columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
-                history_tracks.to_csv("historical_tracks_" + user + "_" + str(todaynow) + "_partial_" + str(page) + ".csv", sep=',', encoding='utf-8')
-    pbar.finish()
+        if page % 50 == 0:
+            history_tracks = pd.DataFrame(
+                np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, mbid_lst]),
+                columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
+            history_tracks.to_csv("historical_tracks_" + user + "_" + str(todaynow) + "_partial_" + str(page) + ".csv", sep=',', encoding='utf-8')
     history_tracks = pd.DataFrame(np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, mbid_lst]), columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
     history_tracks.to_csv("historical_tracks_" + user + "_" + str(todaynow) + ".csv", sep=',', encoding='utf-8')
     return history_tracks
@@ -99,7 +96,7 @@ def main():
     try:
         get_historical_tracks(user, API_KEY, network, s)
     except Exception as e:
-        print(e)
+        print("Error:", e)
 
 if __name__ == '__main__':
     main()
