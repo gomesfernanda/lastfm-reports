@@ -110,3 +110,5 @@ secrets.json
 # Work in progress folder
 WIP/
 
+# Exports
+*.csv
