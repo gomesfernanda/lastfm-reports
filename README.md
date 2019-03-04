@@ -8,6 +8,7 @@ Available functions (ready to use):
 - `lastfm_get_user_loved_tracks.py`: function that prints on the screen the loved tracks for a given user.
 - `lastfm_get_user_friends.py` : function that prints on the screen the friends for a given user, sorted by largest number of scrobbles.
 - `lastfm_get_user_recent_tracks.py` : function that collects and prints the last recent tracks for a given user.
+- `lastfm_get_user_historical_tracks.py` : function that collects and exports in csv all the tracks a user listened to, since the account was created.
 
 How to use on the command line:
 
@@ -22,6 +23,8 @@ How to use on the command line:
     - where the default limit is 10; the user can use any integer to collect the desired number of friends or `all` to collect all friends.
   - `$ py3 lastfm_get_user_recent_tracks.py -u [LASTFM_USER] -l [LIMIT]`
     - where the default limit is 20; the user can use any integer to collect the desired number of recent tracks listened.
+  - `$ py3 lastfm_get_user_historical_tracks -u [LASTFM_USER]`
+    - the only parameter on this script is the user you wanna collect the metrics from. The exports will be saved on a file named after the user and the current date and time.
 
 
 (Thanks to https://github.com/pylast/pylast)
