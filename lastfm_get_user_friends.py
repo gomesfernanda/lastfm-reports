@@ -26,16 +26,20 @@ def get_friends(username, network, limit=400):
     friends_item = user.get_friends(limit)
     for i, friend in enumerate(friends_item):
         thisfriend = []
-        name = friend.name
-        playcount = friend.get_playcount()
-        thisfriend.append(name)
         try:
-            country = friend.get_country().name
-        except:
-            country = "None"
-        thisfriend.append(country)
-        thisfriend.append(playcount)
-        friends_list.append(thisfriend)
+            print(i, friend)
+            name = friend.name
+            playcount = friend.get_playcount()
+            thisfriend.append(name)
+            try:
+                country = friend.get_country().name
+            except:
+                country = "None"
+            thisfriend.append(country)
+            thisfriend.append(playcount)
+            friends_list.append(thisfriend)
+        except Exception as e:
+            print(">>>>>>>>> ", i, friend, "error:", e)
     friends_df = pd.DataFrame(friends_list, columns=["Name", "Country", "Playcount"])
     friends_sorted = friends_df.sort_values(by="Playcount", ascending=False)
     return friends_sorted
