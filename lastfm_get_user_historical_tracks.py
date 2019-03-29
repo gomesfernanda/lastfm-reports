@@ -77,7 +77,7 @@ def get_users_artists(user, API_key, network):
         topartists = r_json["topartists"]
         artists_list = topartists["artist"]
         for n, art in enumerate(artists_list):
-            progbar(int(cont), int(total_artists), "artist", 20)
+            progbar(int(cont + 1), int(total_artists), "artist", 20)
             cont += 1
             artist_name = art["name"]
             artist_tags = get_tags(artist_name, network)
