@@ -1,6 +1,29 @@
 # Lastfm reports
 
-This projects aims to build a report of a user's data in the future. I'm currently working on collecting data and organizing functions.
+## Introduction
+
+This project aims to build a detailed analysis of a user's data.
+
+In order to do so, I must first collect my historical tracks and so on. Below you will find instructions to use this script and some helpers scripts I wrote.
+
+It's important to keep in mind the assumptions I'm making:
+
+1. You have a last.fm account
+2. You have an application on last.fm developer service, since you'll need an API key and API secret (if you don't have it, create one [here](https://www.last.fm/api/account/create))
+3. After you created the application, you saved your credentials as `secrets.json` following the format:
+
+```json
+{
+  "API": {
+    "API_KEY": "YOUR API KEY",
+    "API_SECRET": "YOUR API SECRET",
+    "username": "YOUR USER",
+    "password_hash": "YOUR PASSWORD"
+  }
+}
+```
+
+## Collecting your data
 
 Available functions (ready to use):
 
