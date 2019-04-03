@@ -4,7 +4,7 @@
 
 This project aims to build a detailed analysis of a user's data.
 
-In order to do so, I must first collect my historical tracks and so on. Below you will find instructions to use this script and some helpers scripts I wrote.
+In order to do so, I must first collect the user's historical tracks. Below you will find instructions to use this script and some helpers scripts I wrote.
 
 It's important to keep in mind the assumptions I'm making:
 
@@ -48,6 +48,5 @@ How to use on the command line:
     - where the default limit is 20; the user can use any integer to collect the desired number of recent tracks listened.
   - `$ py3 lastfm_get_user_historical_tracks -u [LASTFM_USER]`
     - the only parameter on this script is the user you wanna collect the metrics from. The exports will be saved on a file named after the user and the current date and time.
-
 
 (Thanks to https://github.com/pylast/pylast)
