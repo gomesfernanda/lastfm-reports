@@ -82,6 +82,8 @@ def get_users_artists(user, API_key, network):
             artist_name = art["name"]
             artist_tags = get_tags(artist_name, network)
             artist_dict[artist_name] = artist_tags
+    with open('artists_' + str(user) + '.json', 'w') as fp:
+        json.dump(artist_dict, fp)
     return artist_dict
 
 
@@ -151,6 +153,8 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
                 np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]),
                 columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
             history_tracks.to_csv(directory + "/historical_tracks_" + user + "_" + str(todaynow) + "_partial_" + str(page) + ".csv", sep=',', encoding='utf-8')
+    with open('artists_' + str(user) + '.json', 'w') as fp:
+        json.dump(artists_dict, fp)
     if not os.path.exists(directory):
         os.makedirs(directory)
     history_tracks = pd.DataFrame(np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]), columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
@@ -164,7 +168,13 @@ def main():
     s = requests.Session()
     network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username, password_hash=password_hash)
     try:
-        artists_dict = get_users_artists(user, API_KEY, network)
+        try:
+            with open('artists_' + str(user) + '.json') as json_file:
+                artists_dict = json.load(json_file)
+            print("A file with artists tags already exists.")
+        except:
+            print("A file with artists tags doesn't exist. Building the file.")
+            artists_dict = get_users_artists(user, API_KEY, network)
         print("\n\n===========================================================\n")
         get_historical_tracks(user, API_KEY, artists_dict, network, s)
     except Exception as e:
