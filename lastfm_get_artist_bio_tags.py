@@ -51,5 +51,6 @@ def main():
     else:
         print("No functions for your input")
 
+
 if __name__ == '__main__':
     main()
