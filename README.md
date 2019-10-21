@@ -4,6 +4,8 @@
 
 This project aims to build a detailed analysis of a user's data.
 
+For now, the analysis is being done on a Jupyter Notebook and can be seen [here](https://github.com/gomesfernanda/lastfm-reports/blob/master/lastfm_analysis.ipynb).
+
 In order to do so, I must first collect the user's historical tracks. Below you will find instructions to use this script and some helpers scripts I wrote.
 
 It's important to keep in mind the assumptions I'm making:
