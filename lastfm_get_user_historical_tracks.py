@@ -133,11 +133,15 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
             track_name = item['name']
             loved = item['loved']
             try:
+                # date_epoch = item['date']['uts']
+                # date_local = datetime.fromtimestamp(int(date_epoch))
                 date_epoch = item['date']['uts']
-                date_local = datetime.fromtimestamp(int(date_epoch))
+                date_local = int(date_epoch)
             except:
-                date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                date_local = datetime.strptime(date_now, '%Y-%m-%d %H:%M:%S')
+                # date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                # date_local = datetime.strptime(date_now, '%Y-%m-%d %H:%M:%S')
+                date_now = datetime.now()
+                date_local = date_now
             date_lst.append(date_local)
             artist_lst.append(artist_name)
             album_lst.append(album_name)
@@ -157,7 +161,7 @@ def get_historical_tracks(user, API_key, artists_dict, network, session):
         json.dump(artists_dict, fp)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    history_tracks = pd.DataFrame(np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]), columns=['Date Spain', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
+    history_tracks = pd.DataFrame(np.column_stack([date_lst, artist_lst, track_lst, album_lst, loved_lst, tags_lst]), columns=['Timestamp', 'Artist', 'Track', 'Album', 'Loved', 'Tags'])
     history_tracks.to_csv(directory + "/historical_tracks_" + user + "_" + str(todaynow) + ".csv", sep=',', encoding='utf-8')
     return history_tracks
 
