@@ -63,9 +63,9 @@ Now that we have dependencies and services up and running, we will collect the d
 On the terminal (inside your virtual environment and inside the cloned repo folder), you will run the command:
 
 ```
-$ py get_user_artists.py -u [LASTFM_USER]
+$ py lastfm_get_user_historical_tracks.py -u [LASTFM_USER]
 ```
-The script `get_user_artists.py` will collect the whole history of listened tracks for the given user (`LASTFM_USER`) and save it as a csv file inside a folder it will create. The script overwrites its file with collected tracks each 200 entries (following last.fm pagination).
+The script `lastfm_get_user_historical_tracks.py` will collect the whole history of listened tracks for the given user (`LASTFM_USER`) and save it as a csv file inside a folder it will create. The script overwrites its file with collected tracks each 200 entries (following last.fm pagination).
 
 This script still fails sometimes for API reasons mostly. You just have to run the command again because it will catch up with the last file and collect the incremental data.
 
