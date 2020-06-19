@@ -7,6 +7,7 @@ import argparse
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from file_manipulation import get_last_file, save_file, create_copy, total_rows
+from get_user_recent_tracks import get_longevity
 
 
 def progbar(curr, total, unit, full_progbar):
@@ -80,14 +81,10 @@ def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_
     r = requests.get(url)
     r_json = json.loads(r.content)
     pages = int(r_json['recenttracks']['@attr']['totalPages'])
-    print('Pages: ', pages)
     for page in reversed(range(1, pages + 1)):
         page_lst = []
         run_limit = diff - (200) * (page - 1)
         i = start + run_limit - 1
-        print('\nRun limit: ', run_limit)
-        print('i: ', i)
-        print('cont: ', cont)
         url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=' + str(user) + '&api_key=' + str(
             api_key) + '&format=json&limit=200&page=' + str(page) + '&extended=1&from=' + str(date_from)
         r = requests.get(url)
@@ -195,46 +192,52 @@ def main():
     network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username,
                                    password_hash=password_hash)
 
-    # STEP 1: check if the last updated file exist.
-    # if it does, we create a copy and get the old number of scrobbles
-    # if it doesn't, we create a file with the headers
+    recent = get_longevity(user, network, limit=5)
+    if recent == True:
+        # STEP 1: check if the last updated file exist.
+        # if it does, we create a copy and get the old number of scrobbles
+        # if it doesn't, we create a file with the headers
 
-    new_scrobbles, pages = get_pages_scrobbled(user, network)
-    old_scrobbles, old_date = step1(new_scrobbles, user, path, dest_file, hist_file, columns)
-    diff_scrobbles = new_scrobbles - old_scrobbles
+        new_scrobbles, pages = get_pages_scrobbled(user, network)
+        old_scrobbles, old_date = step1(new_scrobbles, user, path, dest_file, hist_file, columns)
+        diff_scrobbles = new_scrobbles - old_scrobbles
 
-    print('Will scrobble', str(diff_scrobbles), 'tracks')
+        print('Will scrobble', str(diff_scrobbles), 'tracks')
 
-    start = old_scrobbles + 1
+        start = old_scrobbles + 1
 
-    print('New scrobbles: ', new_scrobbles)
-    print('Old scrobbles: ', old_scrobbles)
-    print('Start: ', start)
+        print('New scrobbles: ', new_scrobbles)
+        print('Old scrobbles: ', old_scrobbles)
+        print('Start: ', start)
 
 
-    # STEP 2: collect data for diff scrobbles
+        # STEP 2: collect data for diff scrobbles
 
-    try:
-        with open('artists_tags.json') as json_file:
-            artists_dict = json.load(json_file)
-    except Exception as e:
-        artists_dict = {'none': ['']}
-        with open('artists_tags.json', 'w') as json_file:
-            json.dump(artists_dict, json_file)
+        try:
+            with open('artists_tags.json') as json_file:
+                artists_dict = json.load(json_file)
+        except Exception as e:
+            artists_dict = {'none': ['']}
+            with open('artists_tags.json', 'w') as json_file:
+                json.dump(artists_dict, json_file)
 
-    try:
-        with open('audio_features.json') as json_file:
-            audio_features_dict = json.load(json_file)
+        try:
+            with open('audio_features.json') as json_file:
+                audio_features_dict = json.load(json_file)
 
-    except Exception as e:
-        print('Error opening audio features: ', e)
-        audio_features_dict = {'none': {}}
-        with open('audio_features.json', 'w') as json_file:
-            json.dump(audio_features_dict, json_file)
-            
-    if diff_scrobbles > 0:
-        get_tracks(network, user, API_KEY, diff_scrobbles, start, artists_dict, audio_features_dict, path, dest_file,
-                    old_date)
+        except Exception as e:
+            print('Error opening audio features: ', e)
+            audio_features_dict = {'none': {}}
+            with open('audio_features.json', 'w') as json_file:
+                json.dump(audio_features_dict, json_file)
+
+        if diff_scrobbles > 0:
+            get_tracks(network, user, API_KEY, diff_scrobbles, start, artists_dict, audio_features_dict, path, dest_file,
+                        old_date)
+    else: print("\n"
+                "================================================================================\n"
+                "**WARNING**: User has been active lately. Let's wait until they give it a break\n"
+                "================================================================================")
 
 
 if __name__ == '__main__':

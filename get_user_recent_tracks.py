@@ -1,9 +1,8 @@
 import pylast
-import requests
 import json
 import pandas as pd
-import time
 import argparse
+import datetime
 
 
 def setup():
@@ -23,7 +22,8 @@ def get_credentials():
         password_hash = pylast.md5(password)
     return API_KEY, API_SECRET, username, password, password_hash
 
-def get_recent_tracks(user, network, limit=20):
+
+def get_recent_tracks(user, network, limit=5):
     recent_tracks_list = [['Artist name', 'Track title', 'Date listened']]
     user = network.get_user(user)
     recent_tracks = user.get_recent_tracks(limit)
@@ -31,30 +31,22 @@ def get_recent_tracks(user, network, limit=20):
         track_list = []
         track_list.append(track.track.artist.name)
         track_list.append(track.track.title)
-        time_epoch = track.timestamp
-        time_local = time.strftime('%Y-%m-%d %H:%M', time.localtime(int(time_epoch)))
-        track_list.append(time_local)
+        time_epoch = datetime.datetime.fromtimestamp(int(track.timestamp))
+        track_list.append(time_epoch)
         recent_tracks_list.append(track_list)
     recent_tracks_df = pd.DataFrame(recent_tracks_list[1:], columns=recent_tracks_list[0])
     return recent_tracks_df
 
-def main():
-    args = setup()
-    API_KEY, API_SECRET, username, password, password_hash = get_credentials()
-    s = requests.Session()
-    network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET, username=username,
-                                   password_hash=password_hash)
-    user = args.user
-    try:
-        limit = int(args.limit)
-    except:
-        print("================================================\nLimit not recognized as integer, using limit=20\n================================================")
-        limit=20
-    try:
-        print(get_recent_tracks(user, network, limit))
-    except Exception as e:
-        print("Error:", e)
 
-if __name__ == "__main__":
-    main()
-
+def get_longevity(user, network, limit=5):
+    df = get_recent_tracks(user, network, limit)
+    last = df['Date listened'].iloc[0]
+    print('Last activity:', last)
+    difference = datetime.datetime.now() - last
+    seconds_in_day = 24 * 60 * 60
+    interval = divmod(difference.days * seconds_in_day + difference.seconds, 60)
+    mins = interval[0]
+    if mins > 120:
+        return True
+    else:
+        return False
