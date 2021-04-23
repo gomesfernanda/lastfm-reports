@@ -93,6 +93,7 @@ def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_
         tracks = r_json['recenttracks']['track']
         for t in tracks:
             progbar(int(cont), int(diff), 'track', 20)
+            # print(int(cont), t)
             mbid = t['mbid']
             loved = t['loved']
             artist = t['artist']['name']
@@ -123,6 +124,7 @@ def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_
                 audio_features = ast.literal_eval(audio_features)
             l = l + list(audio_features.values())
             page_lst.append(l)
+
             i -= 1
             cont += 1
         page_lst.reverse()

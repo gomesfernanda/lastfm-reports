@@ -9,6 +9,7 @@ def setup():
     args = parser.parse_args()
     return args
 
+
 def get_credentials():
     with open('secrets.json', 'r') as file:
         jsonfile = json.load(file)
@@ -18,6 +19,7 @@ def get_credentials():
         password = jsonfile['API']['password_hash']
         password_hash = pylast.md5(password)
     return API_KEY, API_SECRET, username, password, password_hash
+
 
 def get_bio_tags(artist, network, limit=20):
     artist_ = network.get_artist(artist)
@@ -37,6 +39,7 @@ def get_bio_tags(artist, network, limit=20):
         toptags_list = []
     return bio, toptags_list
 
+
 def main():
     args = setup()
     artist = args.artist
@@ -50,6 +53,7 @@ def main():
         print(toptags)
     else:
         print('No functions for your input')
+
 
 if __name__ == '__main__':
     main()
