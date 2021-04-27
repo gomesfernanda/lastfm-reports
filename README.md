@@ -13,7 +13,7 @@ This project serves two purposes:
 1. Clone this repo
 2. Create a virtual environment (I use [`venv`](https://docs.python.org/3/library/venv.html))
 3. Activate your environment: `$ source [ENVIRONMENT_NAME]/bin/activate`
-4. Install dependencies: `$ pip install requirements.txt`
+4. Install dependencies: `$ pip install -r requirements.txt`
 
 ### Step 1 - Authorizing services
 
