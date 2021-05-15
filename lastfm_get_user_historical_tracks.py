@@ -14,25 +14,43 @@ def progbar(curr, total, unit, full_progbar):
     frac = curr / total
     filled_progbar = round(frac * full_progbar)
     print('\r Progress: |', '█' * filled_progbar + '-' * (full_progbar - filled_progbar), '| [{:>7.2%}]'.format(frac),
-          " [ ", unit, curr, "|", total, "]", end='')
+          ' [ ', unit, curr, '|', total, ']', end='')
 
 
 def setup():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--user", help="choose username to collect tracks from", required=True)
+    parser.add_argument('-u', '--user', help='choose username to collect tracks from', required=True)
     args = parser.parse_args()
     return args
+
+
+def open_dicts(artists_file, audio_features_file):
+    try:
+        with open(artists_file) as json_file:
+            artists_dict = json.load(json_file)
+    except Exception as e:
+        artists_dict = {'none': ['']}
+        with open(artists_file, 'w') as json_file:
+            json.dump(artists_dict, json_file)
+    try:
+        with open(audio_features_file) as json_file:
+            audio_features_dict = json.load(json_file)
+    except Exception as e:
+        audio_features_dict = {'none': {}}
+        with open(audio_features_file, 'w') as json_file:
+            json.dump(audio_features_dict, json_file)
+    return artists_dict, audio_features_dict
 
 
 def step1(new_scrobbles, user, path, dest_file, hist_file, columns):
     last_file = get_last_file(user, hist_file)
     if last_file != None:
-        print('Found existing file')
+        print("Found existing file")
         old_scrobbles, old_date = total_rows(path, last_file)
         if int(new_scrobbles) > int(old_scrobbles):
             create_copy(path, last_file, dest_file)
     else:
-        print('Could not find file')
+        print("Could not find file")
         save_file(columns, path, dest_file)
         old_scrobbles = 0
         old_date = 0
@@ -43,7 +61,7 @@ def get_credentials(creds_file):
     with open(creds_file, 'r') as file:
         jsonfile = json.load(file)
         API_KEY = jsonfile['API']['API_KEY']
-        API_SECRET = jsonfile['API']["API_SECRET"]
+        API_SECRET = jsonfile['API']['API_SECRET']
         username = jsonfile['API']['username']
         password = jsonfile['API']['password_hash']
         password_hash = pylast.md5(password)
@@ -62,11 +80,11 @@ def get_tags(artist, network, limit=20):
     try:
         toptags = artist_.get_top_tags(limit)
         toptags_list = []
-        unify_artist = str(artist_).lower().replace(" ", "")
-        bad_tags = [unify_artist, "seen live"]
+        unify_artist = str(artist_).lower().replace(' ', '')
+        bad_tags = [unify_artist, 'seen live']
         for i, tag in enumerate(toptags):
             toptag = str(tag.item).lower()
-            toptag_unified = toptag.replace(" ", "")
+            toptag_unified = toptag.replace(' ', '')
             if toptag not in bad_tags and toptag_unified not in bad_tags:
                 toptags_list.append(toptag)
     except Exception as e:
@@ -93,7 +111,6 @@ def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_
         tracks = r_json['recenttracks']['track']
         for t in tracks:
             progbar(int(cont), int(diff), 'track', 20)
-            # print(int(cont), t)
             mbid = t['mbid']
             loved = t['loved']
             artist = t['artist']['name']
@@ -112,34 +129,38 @@ def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_
             else:
                 audio_features = get_audio_features(artist, track)
                 audio_features_dict[key] = audio_features
-                complete_audio_features_file(key, audio_features, audio_features_dict)
-
             if artist in artist_dict:
                 tags = artist_dict[artist]
             else:
                 tags = get_tags(artist, network, limit=20)
-                complete_artists_file(artist, tags)
             l = [i, date_ts, date, mbid, artist, track, album, loved, tags]
             if type(audio_features) == str:
                 audio_features = ast.literal_eval(audio_features)
-            l = l + list(audio_features.values())
+            try:
+                l = l + list(audio_features.values())
+            except: print(audio_features)
             page_lst.append(l)
-
             i -= 1
             cont += 1
         page_lst.reverse()
+        if page % 5 == 0:
+            complete_artists_file(artist, tags)
+            complete_audio_features_file(key, audio_features, audio_features_dict)
         save_file(page_lst, path, dest_file)
+    complete_artists_file(artist, tags)
+    complete_audio_features_file(key, audio_features, audio_features_dict)
+    save_file(page_lst, path, dest_file)
 
 
 def get_audio_features(pass_artist, pass_track):
     sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
-    artist = str(pass_artist).replace("'", '')
-    song = str(pass_track).replace("'", '')
+    artist = str(pass_artist).replace("'", "")
+    song = str(pass_track).replace("'", "")
 
-    q = 'artist:' + artist + ' track:' + song
+    q = "artist:" + artist + " track:" + song
     results = sp.search(q=q)
-    total = results['tracks']['total']
+    total = results["tracks"]["total"]
 
     if total > 0:
         ts = str(results)
@@ -184,7 +205,7 @@ def main():
     user = args.user
     creds_file = 'secrets.json'
     API_KEY, API_SECRET, username, password, password_hash = get_credentials(creds_file)
-    todaynow = datetime.now().strftime("%Y%m%d%H%M")
+    todaynow = datetime.now().strftime('%Y%m%d%H%M')
     path = 'export_' + str(user) + '/'
     dest_file = 'historical_tracks_' + str(user) + '_' + str(todaynow)
     hist_file = 'historical_tracks_'
@@ -195,6 +216,7 @@ def main():
                                    password_hash=password_hash)
 
     recent = get_longevity(user, network, limit=5)
+
     if recent == True:
         # STEP 1: check if the last updated file exist.
         # if it does, we create a copy and get the old number of scrobbles
@@ -212,34 +234,21 @@ def main():
         print('Old scrobbles: ', old_scrobbles)
         print('Start: ', start)
 
+        # STEP 2: open the artist and audio features dictionaries
 
-        # STEP 2: collect data for diff scrobbles
+        artists_file = 'artists_tags.json'
+        audio_features_file = 'audio_features.json'
+        artists_dict, audio_features_dict = open_dicts(artists_file, audio_features_file)
 
-        try:
-            with open('artists_tags.json') as json_file:
-                artists_dict = json.load(json_file)
-        except Exception as e:
-            artists_dict = {'none': ['']}
-            with open('artists_tags.json', 'w') as json_file:
-                json.dump(artists_dict, json_file)
-
-        try:
-            with open('audio_features.json') as json_file:
-                audio_features_dict = json.load(json_file)
-
-        except Exception as e:
-            print('Error opening audio features: ', e)
-            audio_features_dict = {'none': {}}
-            with open('audio_features.json', 'w') as json_file:
-                json.dump(audio_features_dict, json_file)
+        # STEP 3: collect data for diff scrobbles
 
         if diff_scrobbles > 0:
             get_tracks(network, user, API_KEY, diff_scrobbles, start, artists_dict, audio_features_dict, path, dest_file,
                         old_date)
-    else: print("\n"
-                "================================================================================\n"
+    else: print('\n'
+                '================================================================================\n'
                 "**WARNING**: User has been active lately. Let's wait until they give it a break\n"
-                "================================================================================")
+                '================================================================================')
 
 
 if __name__ == '__main__':
