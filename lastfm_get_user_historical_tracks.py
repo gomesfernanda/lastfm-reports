@@ -8,6 +8,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from file_manipulation import get_last_file, save_file, create_copy, total_rows
 from get_user_recent_tracks import get_longevity
+import time
 
 
 def progbar(curr, total, unit, full_progbar):
@@ -93,63 +94,65 @@ def get_tags(artist, network, limit=20):
 
 
 def get_tracks(network, user, api_key, diff, start, artist_dict, audio_features_dict, path, dest_file, date_from):
-    cont = 1
-    url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=' + str(user) + '&api_key=' + str(
-        api_key) + '&format=json&limit=200&extended=1&from=' + str(date_from)
-    r = requests.get(url)
-    r_json = json.loads(r.content)
-    pages = int(r_json['recenttracks']['@attr']['totalPages'])
-    for page in reversed(range(1, pages + 1)):
-        page_lst = []
-        run_limit = diff - (200) * (page - 1)
-        i = start + run_limit - 1
+        cont = 1
         url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=' + str(user) + '&api_key=' + str(
-            api_key) + '&format=json&limit=200&page=' + str(page) + '&extended=1&from=' + str(date_from)
+            api_key) + '&format=json&limit=200&extended=1&from=' + str(date_from)
         r = requests.get(url)
         r_json = json.loads(r.content)
+        pages = int(r_json['recenttracks']['@attr']['totalPages'])
+        for page in reversed(range(1, pages + 1)):
+            page_lst = []
+            run_limit = diff - (200) * (page - 1)
+            i = start + run_limit - 1
+            url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=' + str(user) + '&api_key=' + str(
+                api_key) + '&format=json&limit=200&page=' + str(page) + '&extended=1&from=' + str(date_from)
+            r = requests.get(url)
+            r_json = json.loads(r.content)
 
-        tracks = r_json['recenttracks']['track']
-        for t in tracks:
-            progbar(int(cont), int(diff), 'track', 20)
-            mbid = t['mbid']
-            loved = t['loved']
-            artist = t['artist']['name']
-            try:
-                date_epoch = t['date']['uts']
-                date_ts = int(date_epoch)
-            except:
-                date_now = datetime.now()
-                date_ts = int(datetime.timestamp(date_now))
-            date = (datetime.utcfromtimestamp(date_ts).strftime('%Y-%m-%d %H:%M:%S'))
-            track = t['name']
-            album = t['album']['#text']
-            key = artist + track + album
-            if key in audio_features_dict:
-                audio_features = audio_features_dict[key]
-            else:
-                audio_features = get_audio_features(artist, track)
-                audio_features_dict[key] = audio_features
-            if artist in artist_dict:
-                tags = artist_dict[artist]
-            else:
-                tags = get_tags(artist, network, limit=20)
-            l = [i, date_ts, date, mbid, artist, track, album, loved, tags]
-            if type(audio_features) == str:
-                audio_features = ast.literal_eval(audio_features)
-            try:
-                l = l + list(audio_features.values())
-            except: print(audio_features)
-            page_lst.append(l)
-            i -= 1
-            cont += 1
-        page_lst.reverse()
-        if page % 5 == 0:
-            complete_artists_file(artist, tags)
-            complete_audio_features_file(key, audio_features, audio_features_dict)
+            tracks = r_json['recenttracks']['track']
+            for t in tracks:
+                progbar(int(cont), int(diff), 'track', 20)
+                mbid = t['mbid']
+                loved = t['loved']
+                artist = t['artist']['name']
+                try:
+                    date_epoch = t['date']['uts']
+                    date_ts = int(date_epoch)
+                except:
+                    date_now = datetime.now()
+                    date_ts = int(datetime.timestamp(date_now))
+                date = (datetime.utcfromtimestamp(date_ts).strftime('%Y-%m-%d %H:%M:%S'))
+                track = t['name']
+                album = t['album']['#text']
+                key = artist + track + album
+                if key in audio_features_dict:
+                    audio_features = audio_features_dict[key]
+                else:
+                    audio_features = get_audio_features(artist, track)
+                    audio_features_dict[key] = audio_features
+                if artist in artist_dict:
+                    tags = artist_dict[artist]
+                else:
+                    tags = get_tags(artist, network, limit=20)
+                l = [i, date_ts, date, mbid, artist, track, album, loved, tags]
+                if type(audio_features) == str:
+                    audio_features = ast.literal_eval(audio_features)
+                try:
+                    l = l + list(audio_features.values())
+                except:
+                    print(audio_features)
+                page_lst.append(l)
+                i -= 1
+                cont += 1
+            page_lst.reverse()
+            if page > 1:
+                save_file(page_lst, path, dest_file)
+            if page % 10 == 0:
+                complete_artists_file(artist, tags)
+                complete_audio_features_file(key, audio_features, audio_features_dict)
+        complete_artists_file(artist, tags)
+        complete_audio_features_file(key, audio_features, audio_features_dict)
         save_file(page_lst, path, dest_file)
-    complete_artists_file(artist, tags)
-    complete_audio_features_file(key, audio_features, audio_features_dict)
-    save_file(page_lst, path, dest_file)
 
 
 def get_audio_features(pass_artist, pass_track):
