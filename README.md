@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project serves two purposes:
+This project serves two main purposes:
 
 1. Collect historical listened tracks for a given last.fm user.
 2. Build a detailed statistical analysis of its listening habits.
