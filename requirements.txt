@@ -14,7 +14,7 @@ colorlog==5.0.1
 cycler==0.10.0
 decorator==5.0.9
 defusedxml==0.7.1
-Django==3.2.3
+Django==3.2.12
 django-markwhat==1.6.2
 entrypoints==0.3
 idna==2.10
